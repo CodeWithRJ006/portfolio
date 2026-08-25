@@ -38,7 +38,7 @@
 
         body {
             background-color: var(--bg); color: var(--text);
-            font-family: 'Space Mono', monospace; overflow-x: hidden;
+            font-family: 'Space Mono', monospace; overflow: hidden;
             transition: background-color 0.8s ease, color 0.8s ease;
         }
 
@@ -74,8 +74,9 @@
 
         /* --- CUSTOM CURSOR --- */
         .cursor-dot, .cursor-outline {
-            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            position: fixed; top: 0; left: 0;
             border-radius: 50%; z-index: 10000; pointer-events: none;
+            will-change: transform;
         }
         .cursor-dot { width: 6px; height: 6px; background: var(--accent); transition: background 0.8s ease; }
         .cursor-outline {
@@ -93,6 +94,14 @@
         .hero h1 .line { overflow: hidden; display: block; }
         .hero h1 .line span { display: block; transform: translateY(110%); }
         .hero-desc { font-size: 1.2rem; max-width: 600px; color: var(--text); opacity: 0.7; margin-top: 20px; }
+        .resume-btn {
+            display: inline-block; margin-top: 30px; padding: 14px 32px;
+            border: 2px solid var(--accent); border-radius: 50px; color: var(--accent);
+            font-family: 'Space Mono', monospace; font-size: 1rem; text-transform: uppercase;
+            text-decoration: none; letter-spacing: 2px;
+            transition: background 0.3s, color 0.3s, border-color 0.8s ease;
+        }
+        .resume-btn:hover { background: var(--accent); color: var(--bg); }
 
         /* --- INFINITE MARQUEE --- */
         .marquee-container {
@@ -151,6 +160,20 @@
 
         .spacer { height: 70vh; width: 100%; background: transparent; pointer-events: none; }
 
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .timeline-item { grid-template-columns: 1fr; gap: 15px; }
+            .project-row { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .project-desc { text-align: left; max-width: 100%; }
+            .project-title { font-size: 2rem; }
+            .theme-panel {
+                top: auto; bottom: 20px; right: 20px;
+                padding: 6px; gap: 6px;
+            }
+            .theme-btn { padding: 6px 10px; font-size: 0.65rem; }
+            .section-header { font-size: 3rem; }
+        }
+
     </style>
 </head>
 <body>
@@ -183,6 +206,7 @@
                 <span class="line"><span class="gsap-title">BOKINALA.</span></span>
             </h1>
             <p class="hero-desc gsap-fade" style="opacity: 0;">2nd Year Computer Science Engineering student specializing in Artificial Intelligence and Machine Learning. Engineering scalable systems and pushing the limits of computer vision.</p>
+            <a href="DBMS PROJECT 6620.pdf" download class="resume-btn magnetic gsap-fade" style="opacity: 0;">↓ Download Resume</a>
         </section>
 
         <div class="marquee-container">
@@ -195,23 +219,23 @@
         <section class="projects-wrapper">
             <h2 class="section-header gsap-fade">Deployments</h2>
             
-            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=800">
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=800" data-url="https://github.com/CodeWithRJ006/attendrix">
                 <div class="project-title">Attendrix</div>
                 <div class="project-desc">AI-powered smart attendance system utilizing advanced computer vision to streamline environment management.</div>
             </div>
-            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800">
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800" data-url="https://github.com/CodeWithRJ006/astralab">
                 <div class="project-title">AstraLab</div>
                 <div class="project-desc">Dynamic virtual lab simulation platform allowing interactive execution of scientific experiments online.</div>
             </div>
-            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800">
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800" data-url="https://github.com/CodeWithRJ006/paceflow">
                 <div class="project-title">PaceFlow</div>
                 <div class="project-desc">Sophisticated logic-driven application engineered for optimized routing, pathfinding, and operational efficiency.</div>
             </div>
-            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800">
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" data-url="https://github.com/CodeWithRJ006/sparkfix">
                 <div class="project-title">Spark Fix</div>
                 <div class="project-desc">Modern digital interface designed for rapid request handling and seamless organizational problem resolution.</div>
             </div>
-            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800">
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800" data-url="https://github.com/CodeWithRJ006/moodwave">
                 <div class="project-title">Mood Wave</div>
                 <div class="project-desc">Context-aware audio application dynamically curating soundscapes tailored to precise user sentiment.</div>
             </div>
@@ -264,17 +288,20 @@
     <footer>
         <h2>INITIATE SEQUENCE.</h2>
         <p>Currently pursuing a 7.79 CGPA at St. Martin's Engineering College. Active Byte Club member. Architecting the future, seeking remote AI/ML software engineering roles globally.</p>
-        <button class="contact-btn magnetic">Transmit Data</button>
+        <a href="mailto:bokinalarj@gmail.com?subject=Hello%20from%20your%20Portfolio" class="contact-btn magnetic" style="text-decoration:none;">Transmit Data</a>
     </footer>
 
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
         // --- THEME SWITCHER LOGIC ---
+        let cachedGridRgb = getComputedStyle(document.documentElement).getPropertyValue('--grid-rgb').trim() || '0, 240, 255';
+
         function setTheme(theme, btnElement) {
             document.documentElement.setAttribute('data-theme', theme);
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
+            cachedGridRgb = getComputedStyle(document.documentElement).getPropertyValue('--grid-rgb').trim() || '0, 240, 255';
         }
 
         // --- MAGNETIC BUTTONS (Premium Feel) ---
@@ -310,6 +337,8 @@
         }, 100);
 
         function initHero() {
+            document.body.style.overflowX = 'hidden';
+            document.body.style.overflowY = 'auto';
             gsap.to(".gsap-title", { y: "0%", duration: 1.2, stagger: 0.15, ease: "power4.out" });
             gsap.to(".gsap-fade", { opacity: 1, duration: 1.5, delay: 0.5 });
             initMagneticButtons();
@@ -329,19 +358,19 @@
 
         window.addEventListener('mousemove', (e) => {
             mouseX = e.clientX; mouseY = e.clientY;
-            cursorDot.style.left = mouseX + 'px'; cursorDot.style.top = mouseY + 'px';
+            cursorDot.style.transform = `translate(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%))`;
             hoverImg.style.left = mouseX + 'px'; hoverImg.style.top = mouseY + 'px';
         });
 
         function animateCursor() {
             outlineX += (mouseX - outlineX) * 0.15;
             outlineY += (mouseY - outlineY) * 0.15;
-            cursorOutline.style.left = outlineX + 'px'; cursorOutline.style.top = outlineY + 'px';
+            cursorOutline.style.transform = `translate(calc(${outlineX}px - 50%), calc(${outlineY}px - 50%))`;
             requestAnimationFrame(animateCursor);
         }
         animateCursor();
 
-        // Hover Effects for Projects
+        // Hover & Click Effects for Projects
         document.querySelectorAll('.project-row').forEach(row => {
             row.addEventListener('mouseenter', () => {
                 cursorOutline.style.width = '80px'; cursorOutline.style.height = '80px';
@@ -355,6 +384,10 @@
                 cursorOutline.style.width = '40px'; cursorOutline.style.height = '40px';
                 hoverImg.style.opacity = '0';
                 hoverImg.style.transform = 'scale(0.8) translate(-50%, -50%)';
+            });
+            row.addEventListener('click', () => {
+                const url = row.getAttribute('data-url');
+                if (url) window.open(url, '_blank', 'noopener');
             });
         });
 
@@ -376,9 +409,7 @@
         function drawGrid() {
             ctx.clearRect(0, 0, width, height);
             
-            // Dynamic RGB fetch based on theme
-            const rootStyles = getComputedStyle(document.documentElement);
-            const gridRgb = rootStyles.getPropertyValue('--grid-rgb').trim() || '0, 240, 255';
+            const gridRgb = cachedGridRgb;
 
             let gradient = ctx.createLinearGradient(0, height, 0, height * 0.3);
             gradient.addColorStop(0, `rgba(${gridRgb}, 0.25)`);
