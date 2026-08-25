@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RJ | Engineered Intelligence</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.33/dist/lenis.min.js"></script>
+
+    <style>
+        /* --- DYNAMIC THEME SYSTEM --- */
+        :root[data-theme="dark"] {
+            --bg: #030303; --text: #f0f0f0; --accent: #00f0ff;
+            --border: rgba(255, 255, 255, 0.1); --grid-rgb: 0, 240, 255; --bg-rgb: 3, 3, 3;
+        }
+        :root[data-theme="light"] {
+            --bg: #e2e8f0; --text: #0f172a; --accent: #4338ca;
+            --border: rgba(0, 0, 0, 0.1); --grid-rgb: 67, 56, 202; --bg-rgb: 226, 232, 240;
+        }
+        :root[data-theme="tokyo"] {
+            --bg: #1a1b26; --text: #a9b1d6; --accent: #f7768e;
+            --border: rgba(169, 177, 214, 0.1); --grid-rgb: 247, 118, 142; --bg-rgb: 26, 27, 38;
+        }
+        :root[data-theme="matrix"] {
+            --bg: #000000; --text: #00ff41; --accent: #00ff41;
+            --border: rgba(0, 255, 65, 0.2); --grid-rgb: 0, 255, 65; --bg-rgb: 0, 0, 0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @media (pointer: fine) { body, a, button { cursor: none; } }
+
+        body {
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Space Mono', monospace; overflow-x: hidden;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+        
+        .container { 
+            width: 100%; padding: 0 5vw; position: relative; z-index: 2; 
+            background: var(--bg); transition: background-color 0.8s ease; 
+        }
+
+        /* --- THEME SWITCHER UI --- */
+        .theme-panel {
+            position: fixed; top: 30px; right: 30px; z-index: 9998;
+            display: flex; gap: 10px; background: rgba(var(--bg-rgb), 0.8);
+            padding: 10px; border-radius: 50px; border: 1px solid var(--border);
+            backdrop-filter: blur(10px); transition: border 0.8s ease, background 0.8s ease;
+        }
+        .theme-btn {
+            background: transparent; color: var(--text); border: none;
+            padding: 8px 16px; border-radius: 30px; font-family: 'Space Mono', monospace;
+            font-size: 0.8rem; text-transform: uppercase; position: relative;
+        }
+        .theme-btn.active { background: var(--text); color: var(--bg); }
+
+        /* --- PRELOADER --- */
+        .preloader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #030303; z-index: 9999; display: flex;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .loader-text { font-size: 2rem; color: #00f0ff; letter-spacing: 5px; }
+        .loader-progress { font-size: 5rem; font-family: 'Oswald', sans-serif; margin-top: 10px; color: #fff;}
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 10000; pointer-events: none;
+        }
+        .cursor-dot { width: 6px; height: 6px; background: var(--accent); transition: background 0.8s ease; }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid var(--accent);
+            transition: width 0.2s, height 0.2s, background 0.2s, border-color 0.8s ease;
+        }
+
+        /* --- BACKGROUND CANVAS --- */
+        #grid-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.5; }
+
+        /* --- HERO --- */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; position: relative; }
+        .hero-pre { color: var(--accent); letter-spacing: 4px; font-size: 1rem; margin-bottom: 20px; transition: color 0.8s ease; }
+        .hero h1 { font-size: clamp(4rem, 12vw, 12rem); line-height: 0.85; letter-spacing: -2px; margin-bottom: 30px; }
+        .hero h1 .line { overflow: hidden; display: block; }
+        .hero h1 .line span { display: block; transform: translateY(110%); }
+        .hero-desc { font-size: 1.2rem; max-width: 600px; color: var(--text); opacity: 0.7; margin-top: 20px; }
+
+        /* --- INFINITE MARQUEE --- */
+        .marquee-container {
+            width: 100vw; margin-left: -5vw; padding: 30px 0;
+            background: var(--accent); color: var(--bg); overflow: hidden;
+            display: flex; white-space: nowrap; transform: rotate(-2deg) scale(1.05);
+            margin-top: 50px; margin-bottom: 100px; transition: background 0.8s ease, color 0.8s ease;
+        }
+        .marquee-content { font-family: 'Oswald', sans-serif; font-size: 3rem; font-weight: 700; text-transform: uppercase; animation: marquee 20s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* --- PROJECTS --- */
+        .projects-wrapper { padding: 50px 0 100px 0; position: relative; }
+        .section-header { font-size: 5rem; margin-bottom: 80px; border-bottom: 2px solid var(--accent); padding-bottom: 20px; display: inline-block; transition: border-color 0.8s ease; }
+        
+        .project-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 60px 0; border-bottom: 1px solid var(--border); position: relative; overflow: hidden;
+            transition: border-color 0.8s ease;
+        }
+        .project-title { font-size: 4rem; transition: all 0.5s; z-index: 2; pointer-events: none; }
+        .project-desc { max-width: 400px; text-align: right; opacity: 0.5; transition: all 0.5s; pointer-events: none; line-height: 1.6;}
+        
+        .project-row:hover .project-title { color: var(--accent); transform: translateX(30px); }
+        .project-row:hover .project-desc { opacity: 1; transform: translateX(-30px); }
+
+        .hover-reveal-img {
+            position: fixed; top: 0; left: 0; width: 350px; height: 250px;
+            background-size: cover; background-position: center; pointer-events: none;
+            opacity: 0; transform: scale(0.8) translate(-50%, -50%); z-index: 10;
+            border-radius: 10px; transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* --- MILESTONES --- */
+        .milestones { padding: 50px 0 150px 0; }
+        .timeline-item { display: grid; grid-template-columns: 1fr 3fr; gap: 50px; padding: 50px 0; border-top: 1px solid var(--border); transition: border-color 0.8s ease; }
+        .timeline-meta { color: var(--accent); font-size: 1.2rem; transition: color 0.8s ease;}
+        .timeline-content h3 { font-size: 2.5rem; margin-bottom: 15px; }
+        .timeline-content p { color: var(--text); opacity: 0.6; line-height: 1.6; font-size: 1.1rem; transition: color 0.8s ease; }
+
+        /* --- PARALLAX FOOTER --- */
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh;
+            background: var(--accent); color: var(--bg);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1; text-align: center; transition: background 0.8s ease, color 0.8s ease;
+        }
+        footer h2 { font-size: clamp(3rem, 8vw, 6rem); line-height: 1; margin-bottom: 20px; }
+        footer p { font-size: 1.2rem; max-width: 600px; margin-bottom: 40px; opacity: 0.9; line-height: 1.6;}
+        .contact-btn {
+            padding: 20px 40px; border: 2px solid var(--bg); border-radius: 50px;
+            font-size: 1.2rem; text-transform: uppercase; background: transparent; color: var(--bg);
+            position: relative; overflow: hidden; transition: all 0.3s;
+        }
+        .contact-btn:hover { background: var(--bg); color: var(--accent); }
+
+        .spacer { height: 70vh; width: 100%; background: transparent; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <div class="preloader">
+        <div class="loader-text">INITIALIZING CORE...</div>
+        <div class="loader-progress">0%</div>
+    </div>
+
+    <div class="theme-panel">
+        <button class="theme-btn magnetic active" onclick="setTheme('dark', this)">Dark</button>
+        <button class="theme-btn magnetic" onclick="setTheme('light', this)">Light</button>
+        <button class="theme-btn magnetic" onclick="setTheme('tokyo', this)">Tokyo</button>
+        <button class="theme-btn magnetic" onclick="setTheme('matrix', this)">Matrix</button>
+    </div>
+
+    <canvas id="grid-canvas"></canvas>
+
+    <div class="hover-reveal-img" id="hover-img"></div>
+
+    <div class="container">
+        
+        <section class="hero">
+            <div class="hero-pre">SYS.INIT // BATCH_2 // HYD_SERVER</div>
+            <h1>
+                <span class="line"><span class="gsap-title">RAJESWARA RAO</span></span>
+                <span class="line"><span class="gsap-title">BOKINALA.</span></span>
+            </h1>
+            <p class="hero-desc gsap-fade" style="opacity: 0;">2nd Year Computer Science Engineering student specializing in Artificial Intelligence and Machine Learning. Engineering scalable systems and pushing the limits of computer vision.</p>
+        </section>
+
+        <div class="marquee-container">
+            <div class="marquee-content">
+                ARTIFICIAL INTELLIGENCE // MACHINE LEARNING // COMPUTER VISION // SCALABLE ARCHITECTURES // JAVA // DATA STRUCTURES // 
+                ARTIFICIAL INTELLIGENCE // MACHINE LEARNING // COMPUTER VISION // SCALABLE ARCHITECTURES // JAVA // DATA STRUCTURES //
+            </div>
+        </div>
+
+        <section class="projects-wrapper">
+            <h2 class="section-header gsap-fade">Deployments</h2>
+            
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&q=80&w=800">
+                <div class="project-title">Attendrix</div>
+                <div class="project-desc">AI-powered smart attendance system utilizing advanced computer vision to streamline environment management.</div>
+            </div>
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800">
+                <div class="project-title">AstraLab</div>
+                <div class="project-desc">Dynamic virtual lab simulation platform allowing interactive execution of scientific experiments online.</div>
+            </div>
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800">
+                <div class="project-title">PaceFlow</div>
+                <div class="project-desc">Sophisticated logic-driven application engineered for optimized routing, pathfinding, and operational efficiency.</div>
+            </div>
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800">
+                <div class="project-title">Spark Fix</div>
+                <div class="project-desc">Modern digital interface designed for rapid request handling and seamless organizational problem resolution.</div>
+            </div>
+            <div class="project-row gsap-row" data-img="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=800">
+                <div class="project-title">Mood Wave</div>
+                <div class="project-desc">Context-aware audio application dynamically curating soundscapes tailored to precise user sentiment.</div>
+            </div>
+        </section>
+
+        <section class="milestones">
+            <h2 class="section-header gsap-fade">Data Logs</h2>
+            
+            <div class="timeline-item gsap-row">
+                <div class="timeline-meta">State-Level // Jan 8-9</div>
+                <div class="timeline-content">
+                    <h3>Darknetrix Hackathon</h3>
+                    <p>Secured 3rd Place at Loyola Academy. Executed high-level problem solving during an intensive, fast-paced two-day daytime sprint (9 AM - 4 PM).</p>
+                </div>
+            </div>
+            <div class="timeline-item gsap-row">
+                <div class="timeline-meta">National Fest</div>
+                <div class="timeline-content">
+                    <h3>VNR Convergence 2K25R</h3>
+                    <p>Awarded 2nd Place in the Ideathon. Showcased rapid conceptualization and technical viability to industry judges.</p>
+                </div>
+            </div>
+            <div class="timeline-item gsap-row">
+                <div class="timeline-meta">IMPULSE BVRIT</div>
+                <div class="timeline-content">
+                    <h3>The CEO Challenge</h3>
+                    <p>Earned a Special Mention from the Director for strategic leadership, analytical thinking, and outstanding operational performance.</p>
+                </div>
+            </div>
+            <div class="timeline-item gsap-row">
+                <div class="timeline-meta">Global Network</div>
+                <div class="timeline-content">
+                    <h3>Aspire Leaders & SMEC Conclave</h3>
+                    <p>Selected participant in the global Aspire Leaders Program, while simultaneously securing sponsorships and organizing the Global Innovation Conclave at St. Martin's Engineering College.</p>
+                </div>
+            </div>
+            <div class="timeline-item gsap-row">
+                <div class="timeline-meta">Diplomacy // UNGA-DISEC</div>
+                <div class="timeline-content">
+                    <h3>BVRIT MUN</h3>
+                    <p>Represented Sudan in the UNGA-DISEC committee, debating complex international security, disarmament protocols, and global policy.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <div class="spacer"></div>
+
+    <footer>
+        <h2>INITIATE SEQUENCE.</h2>
+        <p>Currently pursuing a 7.79 CGPA at St. Martin's Engineering College. Active Byte Club member. Architecting the future, seeking remote AI/ML software engineering roles globally.</p>
+        <button class="contact-btn magnetic">Transmit Data</button>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- THEME SWITCHER LOGIC ---
+        function setTheme(theme, btnElement) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        // --- MAGNETIC BUTTONS (Premium Feel) ---
+        const initMagneticButtons = () => {
+            const magneticElements = document.querySelectorAll('.magnetic');
+            magneticElements.forEach((elem) => {
+                elem.addEventListener('mousemove', (e) => {
+                    const rect = elem.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    gsap.to(elem, { x: x * 0.4, y: y * 0.4, duration: 0.5, ease: "power3.out" });
+                });
+                elem.addEventListener('mouseleave', () => {
+                    gsap.to(elem, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+                });
+            });
+        };
+
+        // --- BOOT SEQUENCE ---
+        let progress = 0;
+        const progressEl = document.querySelector('.loader-progress');
+        const preloader = document.querySelector('.preloader');
+
+        let bootInterval = setInterval(() => {
+            progress += Math.floor(Math.random() * 10) + 5;
+            if(progress > 100) progress = 100;
+            progressEl.innerText = progress + "%";
+            
+            if(progress === 100) {
+                clearInterval(bootInterval);
+                gsap.to(preloader, { yPercent: -100, duration: 1, ease: "power4.inOut", delay: 0.5, onComplete: initHero });
+            }
+        }, 100);
+
+        function initHero() {
+            gsap.to(".gsap-title", { y: "0%", duration: 1.2, stagger: 0.15, ease: "power4.out" });
+            gsap.to(".gsap-fade", { opacity: 1, duration: 1.5, delay: 0.5 });
+            initMagneticButtons();
+        }
+
+        // --- SMOOTH SCROLL ---
+        const lenis = new Lenis({ duration: 1.2, smooth: true });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // --- CUSTOM CURSOR ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        const hoverImg = document.getElementById('hover-img');
+        
+        let mouseX = 0, mouseY = 0, outlineX = 0, outlineY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            cursorDot.style.left = mouseX + 'px'; cursorDot.style.top = mouseY + 'px';
+            hoverImg.style.left = mouseX + 'px'; hoverImg.style.top = mouseY + 'px';
+        });
+
+        function animateCursor() {
+            outlineX += (mouseX - outlineX) * 0.15;
+            outlineY += (mouseY - outlineY) * 0.15;
+            cursorOutline.style.left = outlineX + 'px'; cursorOutline.style.top = outlineY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hover Effects for Projects
+        document.querySelectorAll('.project-row').forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                cursorOutline.style.width = '80px'; cursorOutline.style.height = '80px';
+                
+                const imgSrc = row.getAttribute('data-img');
+                hoverImg.style.backgroundImage = `url(${imgSrc})`;
+                hoverImg.style.opacity = '1';
+                hoverImg.style.transform = 'scale(1) translate(-50%, -50%)';
+            });
+            row.addEventListener('mouseleave', () => {
+                cursorOutline.style.width = '40px'; cursorOutline.style.height = '40px';
+                hoverImg.style.opacity = '0';
+                hoverImg.style.transform = 'scale(0.8) translate(-50%, -50%)';
+            });
+        });
+
+        // --- SCROLL ANIMATIONS ---
+        gsap.utils.toArray('.gsap-row').forEach((row) => {
+            gsap.from(row, { scrollTrigger: { trigger: row, start: "top 90%" }, opacity: 0, y: 50, duration: 0.8, ease: "power3.out" });
+        });
+
+        // --- DYNAMIC CANVAS BACKGROUND ---
+        const canvas = document.getElementById('grid-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, scrollY = 0;
+
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+        lenis.on('scroll', (e) => { scrollY = e.animatedScroll; });
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Dynamic RGB fetch based on theme
+            const rootStyles = getComputedStyle(document.documentElement);
+            const gridRgb = rootStyles.getPropertyValue('--grid-rgb').trim() || '0, 240, 255';
+
+            let gradient = ctx.createLinearGradient(0, height, 0, height * 0.3);
+            gradient.addColorStop(0, `rgba(${gridRgb}, 0.25)`);
+            gradient.addColorStop(1, `rgba(${gridRgb}, 0)`);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 1;
+
+            const originY = height * 0.3;
+            const gridSpacing = 60;
+            
+            // Vertical Perspective Lines
+            ctx.beginPath();
+            for (let i = -width; i <= width * 2; i += gridSpacing * 2) {
+                ctx.moveTo(width / 2 + (i - width / 2) * 0.1, originY);
+                ctx.lineTo(i, height);
+            }
+            ctx.stroke();
+
+            // Horizontal scrolling lines
+            ctx.beginPath();
+            let timeOffset = (Date.now() * 0.03 + scrollY * 0.5) % gridSpacing;
+            for (let y = 0; y < height - originY; y += gridSpacing) {
+                let currentY = originY + Math.pow((y + timeOffset) / (height - originY), 2) * (height - originY);
+                if(currentY > originY && currentY < height) {
+                    ctx.moveTo(0, currentY);
+                    ctx.lineTo(width, currentY);
+                }
+            }
+            ctx.stroke();
+            requestAnimationFrame(drawGrid);
+        }
+        drawGrid();
+
+    </script>
+</body>
+</html>
